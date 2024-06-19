@@ -2,8 +2,11 @@ package main
 
 import (
 	"MiniZanzibar/controllers"
+	"MiniZanzibar/security"
 	"MiniZanzibar/services"
 	"log"
+	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/consul/api"
@@ -19,7 +22,16 @@ func main() {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
+
+	secured, err := strconv.ParseBool(os.Getenv("USE_API_KEY"))
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
 	router := gin.Default()
+	if secured {
+		router.Use(security.ApiKeyAuthMiddleware())
+	}
 
 	consulDbClient, err := api.NewClient(api.DefaultConfig())
 	if err != nil {
