@@ -4,7 +4,6 @@ import (
 	"MiniZanzibar/dto"
 	"encoding/json"
 	"fmt"
-	"log"
 )
 
 type Namespace struct {
@@ -23,20 +22,20 @@ func NewNamespace(dto dto.NamespaceDto) Namespace {
 	}
 }
 
-func (namespace *Namespace) Encode() []byte {
+func (namespace *Namespace) Encode() ([]byte, error) {
 	data, err := json.Marshal(namespace)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	return data
+	return data, nil
 }
 
-func NewNamespaceFromBytes(data []byte) Namespace {
+func NewNamespaceFromBytes(data []byte) (Namespace, error) {
 	var namespace Namespace
 	fmt.Println(string(data[:]))
 	if err := json.Unmarshal(data, &namespace); err != nil {
-		panic(err)
+		return Namespace{}, err
 	}
 
-	return namespace
+	return namespace, nil
 }

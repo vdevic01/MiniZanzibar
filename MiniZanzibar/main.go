@@ -3,9 +3,11 @@ package main
 import (
 	"MiniZanzibar/controllers"
 	"MiniZanzibar/services"
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/consul/api"
-	"log"
+	"github.com/joho/godotenv"
 )
 
 const (
@@ -13,6 +15,10 @@ const (
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
 	router := gin.Default()
 
 	consulDbClient, err := api.NewClient(api.DefaultConfig())

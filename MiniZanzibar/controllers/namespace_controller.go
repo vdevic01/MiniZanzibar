@@ -3,8 +3,9 @@ package controllers
 import (
 	"MiniZanzibar/dto"
 	"MiniZanzibar/services"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type NamespaceController struct {
@@ -21,16 +22,7 @@ func NewNamespaceController(apiRoutePrefix string, namespaceService *services.Na
 }
 
 func (controller *NamespaceController) RegisterRoutes(router *gin.Engine) {
-	router.GET(controller.route+"/:namespace_id", controller.GetNamespace)
-	router.GET(controller.route+"/all", controller.GetAllNamespace)
 	router.POST(controller.route, controller.SaveNamespace)
-}
-
-func (controller *NamespaceController) GetNamespace(context *gin.Context) {
-}
-
-func (controller *NamespaceController) GetAllNamespace(context *gin.Context) {
-
 }
 
 func (controller *NamespaceController) SaveNamespace(context *gin.Context) {
@@ -41,7 +33,8 @@ func (controller *NamespaceController) SaveNamespace(context *gin.Context) {
 		return
 	}
 
-	controller.NamespaceService.SaveNamespace(namespaceDto)
+	err := controller.NamespaceService.SaveNamespace(namespaceDto)
+	controller.handleError(context, err)
 
 	context.JSON(http.StatusNoContent, gin.H{})
 }

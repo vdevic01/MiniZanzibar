@@ -6,3 +6,7 @@ type AclTupleDto struct {
 	Relation  string `json:"relation" binding:"required"`
 	UserId    string `json:"user_id" binding:"required"`
 }
+
+type AccessGrant struct {
+	Allowed bool `json:"allowed"`
+}
