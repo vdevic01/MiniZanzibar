@@ -18,10 +18,11 @@ const (
 )
 
 func main() {
-	err := godotenv.Load()
+	err := godotenv.Load("prod.env")
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
+	gin.SetMode(os.Getenv("GIN_MODE"))
 
 	secured, err := strconv.ParseBool(os.Getenv("USE_API_KEY"))
 	if err != nil {
@@ -32,7 +33,6 @@ func main() {
 	if secured {
 		router.Use(security.ApiKeyAuthMiddleware())
 	}
-
 	consulDbClient, err := api.NewClient(api.DefaultConfig())
 	if err != nil {
 		log.Fatal(err)
