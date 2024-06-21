@@ -25,6 +25,7 @@ func (controller *AclController) RegisterRoutes(router *gin.Engine) {
 	router.POST(controller.route+"/check", controller.CheckAcl)
 	router.POST(controller.route, controller.SaveAcl)
 	router.DELETE(controller.route, controller.RemoveAcl)
+	router.GET(controller.route, controller.GetObjectsForUserAndNamespace)
 }
 
 func (controller *AclController) CheckAcl(context *gin.Context) {
@@ -67,4 +68,21 @@ func (controller *AclController) RemoveAcl(context *gin.Context) {
 	controller.handleError(context, err)
 
 	context.JSON(http.StatusNoContent, gin.H{})
+}
+
+func (controller *AclController) GetObjectsForUserAndNamespace(context *gin.Context) {
+	namespace := context.Query("namespace")
+	if namespace == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "namespace paremeter is required"})
+	}
+
+	userId := context.Query("userId")
+	if userId == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "userId paremeter is required"})
+	}
+
+	output, err := controller.AclService.GetObjectsForUserAndNamespace(namespace, userId)
+	controller.handleError(context, err)
+
+	context.JSON(http.StatusOK, output)
 }

@@ -5,8 +5,11 @@ import (
 	"MiniZanzibar/httperr"
 	"MiniZanzibar/model"
 	"MiniZanzibar/utils"
+	"bytes"
+	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/hashicorp/consul/api"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -89,7 +92,43 @@ func contains(slice *[]string, value string) bool {
 }
 
 func buildRelationTupleKey(namespace string, objectId string, relation string, userId string) string {
-	return namespace + ":" + objectId + "#" + relation + "@" + userId
+	return namespace + ":" + userId + "#" + relation + "@" + objectId
+}
+
+func (aclService *AclService) GetObjectsForUserAndNamespace(namespace string, userId string) (dto.UserOwnership, error) {
+	startKey := []byte(fmt.Sprintf("%s:%s", namespace, userId))
+	endKey := []byte(fmt.Sprintf("%s:%s\xff", namespace, userId))
+
+	db, err := leveldb.OpenFile(os.Getenv("LEVELDB_PATH"), nil)
+	if err != nil {
+		return dto.UserOwnership{}, err
+	}
+	defer db.Close()
+
+	iterator := db.NewIterator(nil, nil)
+	defer iterator.Release()
+
+	output := dto.UserOwnership{
+		Namespace: namespace,
+		UserId:    userId,
+		Objects:   make([]dto.ObjectRelationPair, 0),
+	}
+
+	for iterator.Seek(startKey); iterator.Valid(); iterator.Next() {
+		key := iterator.Key()
+		if !bytes.HasPrefix(key, startKey) || bytes.Compare(key, endKey) >= 0 {
+			break
+		}
+		tokens := strings.Split(string(key), "#")
+		tokens = strings.Split(tokens[1], "@")
+		orPair := dto.ObjectRelationPair{
+			ObjectId: tokens[1],
+			Relation: tokens[0],
+		}
+		output.Objects = append(output.Objects, orPair)
+	}
+
+	return output, nil
 }
 
 func (aclService *AclService) SaveAcl(dto dto.AclTupleDto) error {

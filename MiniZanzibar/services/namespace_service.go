@@ -14,7 +14,6 @@ type NamespaceService struct {
 
 func (service *NamespaceService) SaveNamespace(dto dto.NamespaceDto) error {
 	namespace := model.NewNamespace(dto)
-	fmt.Printf("%+v\n", namespace)
 
 	kvClient := service.ConsulDbClient.KV()
 	value, err := namespace.Encode()
@@ -25,6 +24,7 @@ func (service *NamespaceService) SaveNamespace(dto dto.NamespaceDto) error {
 
 	_, err = kvClient.Put(pair, nil)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 	return nil

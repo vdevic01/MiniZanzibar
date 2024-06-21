@@ -10,3 +10,14 @@ type AclTupleDto struct {
 type AccessGrant struct {
 	Allowed bool `json:"allowed"`
 }
+
+type UserOwnership struct {
+	Namespace string               `json:"namespace"`
+	UserId    string               `json:"user_id"`
+	Objects   []ObjectRelationPair `json:"objects"`
+}
+
+type ObjectRelationPair struct {
+	ObjectId string `json:"object_id"`
+	Relation string `json:"relation"`
+}
