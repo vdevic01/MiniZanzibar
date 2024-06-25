@@ -1,0 +1,20 @@
+version: '3'
+services:
+  api:
+    image: mini-zanzibar-image
+    ports:
+      - "8080"
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - ${HOST_DB_PATH}:/data
+  proxy:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - api
