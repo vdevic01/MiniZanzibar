@@ -31,8 +31,7 @@
 - Koristiti HTTPS za sve komunikacije između web aplikacije, zanzibara i baze podataka.
 
 ### Sigurnost Baze Podataka
-- Primeniti  šifre minimalne dužine deset sa specijalnim karakterima.
-- Osigurati da baza podataka nije dostupna direktno preko interneta.
+- Enkriptovati sve osetljive informacije koje se čuvaju u bazi podataka.
 
 ### Zaštita od SQLi Napada
 - Proveriti sve korisnički unete podatke pre njihovog korišćenja u SQL upitima.
