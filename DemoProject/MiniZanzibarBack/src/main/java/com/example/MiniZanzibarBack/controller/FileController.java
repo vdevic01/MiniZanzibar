@@ -1,5 +1,6 @@
 package com.example.MiniZanzibarBack.controller;
 
+import com.example.MiniZanzibarBack.dto.DocumentDTO;
 import com.example.MiniZanzibarBack.model.Document;
 import com.example.MiniZanzibarBack.model.User;
 import com.example.MiniZanzibarBack.repository.UserRepository;
@@ -25,7 +26,10 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/files")
@@ -82,6 +86,29 @@ public class FileController {
             return new ResponseEntity<>("Failed to upload file: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    @GetMapping("/accessible-files")
+    public ResponseEntity<List<DocumentDTO>> getAccessibleFiles() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentPrincipalName = authentication.getName();
+        Optional<User> user = userRepository.findByEmail(currentPrincipalName);
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        // Get accessible file IDs from Zanzibar service
+        List<String> accessibleFileIds = zanzibarService.getAccessibleFiles(user.get().getId().toString());
+
+        // Fetch documents from the database and convert to DTOs
+        List<DocumentDTO> accessibleDocuments = accessibleFileIds.stream()
+                .map(id -> {
+                    Document document = documentService.findById(Long.valueOf(id));
+                    return document != null ? documentService.convertToDTO(document) : null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(accessibleDocuments, HttpStatus.OK);
+    }
 
     @GetMapping("/download/{fileId:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileId) throws IOException {
@@ -120,7 +147,7 @@ public class FileController {
     }
 
     @PostMapping("/permissions/{fileId:.+}")
-    public ResponseEntity<String> addPermission(@PathVariable String fileId, @RequestParam("userId") String userId, @RequestParam("relation") String relation) {
+    public ResponseEntity<String> addPermission(@PathVariable String fileId, @RequestParam("email") String email, @RequestParam("relation") String relation) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentPrincipalName = authentication.getName();
         Optional<User> user = userRepository.findByEmail(currentPrincipalName);
@@ -128,16 +155,87 @@ public class FileController {
             return new ResponseEntity<>("User not found!", HttpStatus.FORBIDDEN);
         }
 
+        Optional<User> userToshareWith = userRepository.findByEmail(email);
+        if (userToshareWith.isEmpty()) {
+            return new ResponseEntity<>("User not found!", HttpStatus.FORBIDDEN);
+        }
+
         // Check if the current user is the owner of the file
         Document document = documentService.findById(Long.valueOf(fileId));
-        if (document == null || zanzibarService.checkAccess(user.get().getEmail(), fileId, relation)) {
+        if (document == null || !zanzibarService.checkAccess(user.get().getId().toString(), fileId, "owner")) {
             return new ResponseEntity<>("You do not have permission to grant access to this file!", HttpStatus.FORBIDDEN);
         }
 
         // Create ACL for the specified user to have access to the file
-        zanzibarService.createAcl(userId, fileId, relation);
+        zanzibarService.createAcl(userToshareWith.get().getId().toString(), fileId, relation);
 
         return new ResponseEntity<>("Permission granted successfully.", HttpStatus.OK);
+    }
+
+
+    @DeleteMapping("/permissions/{fileId:.+}")
+    public ResponseEntity<String> deletePermission(@PathVariable String fileId, @RequestParam("email") String email, @RequestParam("relation") String relation) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentPrincipalName = authentication.getName();
+        Optional<User> user = userRepository.findByEmail(currentPrincipalName);
+        if (user.isEmpty()) {
+            return new ResponseEntity<>("User not found!", HttpStatus.FORBIDDEN);
+        }
+
+
+        Optional<User> userToUnshareWith = userRepository.findByEmail(email);
+        if (userToUnshareWith.isEmpty()) {
+            return new ResponseEntity<>("User not found!", HttpStatus.FORBIDDEN);
+        }
+
+        // Check if the current user is the owner of the file
+        Document document = documentService.findById(Long.valueOf(fileId));
+        if (document == null || !zanzibarService.checkAccess(user.get().getId().toString(), fileId, relation)) {
+            return new ResponseEntity<>("You do not have permission to delete access to this file!", HttpStatus.FORBIDDEN);
+        }
+
+        // Delete ACL for the specified user to remove access to the file
+        zanzibarService.deleteAcl(userToUnshareWith.get().getId().toString(), fileId, relation);
+
+        return new ResponseEntity<>("Permission deleted successfully.", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{fileId:.+}")
+    public ResponseEntity<String> deleteFile(@PathVariable String fileId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentPrincipalName = authentication.getName();
+        Optional<User> user = userRepository.findByEmail(currentPrincipalName);
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        // Check if the user has permission to delete the file
+        boolean hasAccess = zanzibarService.checkAccess(user.get().getId().toString(), fileId, "owner");
+        if (!hasAccess) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        try {
+            // Find the document
+            Document document = documentService.findById(Long.valueOf(fileId));
+            if (document == null) {
+                return new ResponseEntity<>("Document not found!", HttpStatus.NOT_FOUND);
+            }
+
+            // Delete the file from the file system
+            Path filePath = Paths.get(UPLOAD_DIR).resolve(fileId).normalize();
+            Files.deleteIfExists(filePath);
+
+            // Delete the document from the database
+            documentService.delete(document);
+
+            // Delete ACL for the file
+            zanzibarService.deleteAcl(user.get().getId().toString(), fileId, "editor");
+
+            return new ResponseEntity<>("Document deleted successfully.", HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>("Failed to delete file: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
 
