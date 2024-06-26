@@ -86,6 +86,31 @@ public class FileController {
             return new ResponseEntity<>("Failed to upload file: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/owned-files")
+    public ResponseEntity<List<DocumentDTO>> getOwnedFiles() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentPrincipalName = authentication.getName();
+        Optional<User> user = userRepository.findByEmail(currentPrincipalName);
+        if (user.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        // Get owned file IDs from Zanzibar service
+        List<String> ownedFileIds = zanzibarService.getOwnedFiles(user.get().getId().toString());
+
+        // Fetch documents from the database and convert to DTOs
+        List<DocumentDTO> ownedDocuments = ownedFileIds.stream()
+                .map(id -> {
+                    Document document = documentService.findById(Long.valueOf(id));
+                    return document != null ? documentService.convertToDTO(document) : null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(ownedDocuments, HttpStatus.OK);
+    }
+
     @GetMapping("/accessible-files")
     public ResponseEntity<List<DocumentDTO>> getAccessibleFiles() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -109,6 +134,8 @@ public class FileController {
 
         return new ResponseEntity<>(accessibleDocuments, HttpStatus.OK);
     }
+
+
 
     @GetMapping("/download/{fileId:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileId) throws IOException {
