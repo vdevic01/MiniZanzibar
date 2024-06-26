@@ -38,12 +38,27 @@ public class ZanzibarService {
         return response.getBody() != null && response.getBody().isAllowed();
     }
 
+
+    public List<String> getOwnedFiles(String userId) {
+        String url = String.format("http://localhost:8080/api/acl?namespace=doc&userId=%s", userId);
+
+        ResponseEntity<AccessibleFilesResponse> response = restTemplate.getForEntity(url, AccessibleFilesResponse.class);
+        if (response.getBody() != null && response.getBody().getObjects() != null) {
+            return response.getBody().getObjects().stream()
+                    .filter(object -> "owner".equals(object.getRelation()))
+                    .map(AccessibleFilesResponse.AccessibleObject::getObject_id)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
     public List<String> getAccessibleFiles(String userId) {
         String url = String.format("http://localhost:8080/api/acl?namespace=doc&userId=%s", userId);
 
         ResponseEntity<AccessibleFilesResponse> response = restTemplate.getForEntity(url, AccessibleFilesResponse.class);
         if (response.getBody() != null && response.getBody().getObjects() != null) {
             return response.getBody().getObjects().stream()
+                    .filter(object -> !"owner".equals(object.getRelation()))
                     .map(AccessibleFilesResponse.AccessibleObject::getObject_id)
                     .collect(Collectors.toList());
         }
