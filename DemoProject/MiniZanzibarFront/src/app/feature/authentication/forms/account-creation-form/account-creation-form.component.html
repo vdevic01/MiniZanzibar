@@ -1,0 +1,51 @@
+<div class="container">
+  <h2 class="title">Sign in</h2>
+
+  <div class="content_box" *ngIf="activeTab === 'signup'">
+    <form [formGroup]="signupForm">
+      <app-form-field
+        class="input"
+        [formGroup]="signupForm"
+        [controlName]="'username'"
+        [type]="'text'"
+        [icon]="'fas fa-user'"
+        [placeholder]="'Username'"
+      >
+      </app-form-field>
+
+      <app-form-field
+        class="input"
+        [formGroup]="signupForm"
+        [controlName]="'password'"
+        [type]="'password'"
+        [icon]="'fas fa-lock'"
+        [placeholder]="'Password'"
+        [errorMessages]="{
+          pattern: 'Must have one uppercase and one numeric letter'
+        }"
+      >
+      </app-form-field>
+
+      <app-form-field
+        class="input"
+        [formGroup]="signupForm"
+        [controlName]="'confirmPassword'"
+        [type]="'password'"
+        [icon]="'fas fa-lock'"
+        [placeholder]="'Confirm password'"
+        [errorMessages]="{
+          matching: 'Passwords must match'
+        }"
+      >
+      </app-form-field>
+
+      <app-form-button
+        [form]="signupForm"
+        [buttonText]="'CONTINUE'"
+        (onSubmit)="submitForm()"
+      >
+      </app-form-button>
+    </form>
+  </div>
+
+</div>
