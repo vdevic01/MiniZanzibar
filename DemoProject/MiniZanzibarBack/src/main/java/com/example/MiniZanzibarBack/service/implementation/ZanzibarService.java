@@ -1,5 +1,6 @@
 package com.example.MiniZanzibarBack.service.implementation;
 
+import com.example.MiniZanzibarBack.dto.AclCheckResponse;
 import com.example.MiniZanzibarBack.model.Document;
 import com.example.MiniZanzibarBack.repository.BaseJPARepository;
 import com.example.MiniZanzibarBack.repository.DocumentRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
+
 @Service
 public class ZanzibarService {
     private final RestTemplate restTemplate;
@@ -28,8 +30,8 @@ public class ZanzibarService {
                 "user_id", userId
         );
 
-        ResponseEntity<Boolean> response = restTemplate.postForEntity(url, request, Boolean.class);
-        return response.getBody() != null && response.getBody();
+        ResponseEntity<AclCheckResponse> response = restTemplate.postForEntity(url, request, AclCheckResponse.class);
+        return response.getBody() != null && response.getBody().isAllowed();
     }
 
     public void createAcl(String userId, String fileId, String relation) {
@@ -44,3 +46,4 @@ public class ZanzibarService {
         restTemplate.postForEntity(url, request, Void.class);
     }
 }
+

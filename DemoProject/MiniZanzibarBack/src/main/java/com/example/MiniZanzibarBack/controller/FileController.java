@@ -75,7 +75,7 @@ public class FileController {
             file.transferTo(new File(filePath));
 
             // Create ACL for the user to have access to the file
-            zanzibarService.createAcl(user.get().getId().toString(), document.getId().toString(), "editor");
+            zanzibarService.createAcl(user.get().getId().toString(), document.getId().toString(), "owner");
 
             return new ResponseEntity<>("Document uploaded successfully.", HttpStatus.OK);
         } catch (IOException e) {
@@ -93,7 +93,7 @@ public class FileController {
         }
 
         // Check if the user has permission to access the file
-        boolean hasAccess = zanzibarService.checkAccess(user.get().getId().toString(), fileId, "editor");
+        boolean hasAccess = zanzibarService.checkAccess(user.get().getId().toString(), fileId, "viewer");
         if (!hasAccess) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
