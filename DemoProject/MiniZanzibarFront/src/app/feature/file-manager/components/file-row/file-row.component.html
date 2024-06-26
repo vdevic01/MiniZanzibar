@@ -1,0 +1,32 @@
+<tr>
+  <td>
+    <img [ngSrc]="getImageSrc()" width="60" height="40" alt="">
+    <p>{{ file?.name }}</p>
+  </td>
+  <td>{{ getCreationTime() }}</td>
+  <td>{{ getLastModifiedTime() }}</td>
+  <td>
+    <button mat-icon-button [matMenuTriggerFor]="fileMenu" (click)="$event.stopPropagation();">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+
+    <mat-menu #fileMenu="matMenu">
+      <button mat-menu-item (click)="downloadFile()">
+        <mat-icon>download</mat-icon>
+        <span>Download</span>
+      </button>
+      <button mat-menu-item >
+        <mat-icon>share</mat-icon>
+        <span>Share</span>
+      </button>
+      <button mat-menu-item >
+        <mat-icon>edit</mat-icon>
+        <span>Edit</span>
+      </button>
+      <button mat-menu-item (click)="deleteFile()">
+        <mat-icon>delete</mat-icon>
+        <span>Delete</span>
+      </button>
+    </mat-menu>
+  </td>
+</tr>

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {environment} from "../../environment/environment";
 import {HttpClient, HttpErrorResponse, HttpParams} from "@angular/common/http";
 import {catchError, Observable, throwError} from "rxjs";
-import {UserRegistrationData} from "../../feature/authentication/models/user-registration-data";
+import {UserRegistrationData} from "../../feature/authentication/model/user-registration-data";
 
 @Injectable({
   providedIn: 'root'

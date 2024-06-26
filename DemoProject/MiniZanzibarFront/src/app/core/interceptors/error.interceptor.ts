@@ -21,12 +21,12 @@ export class ErrorInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
       catchError(err => {
-        if ([401, 403].includes(err.status) && this.authService.isLoggedIn()) {
-          this.authService.logout();
-          this.router.navigate(['/login-register']).then(() => {
-            this.notificationService.showWarning("Session expired", "Your session has expired", "topRight");
-          })
-        }
+        // if ([401, 403].includes(err.status) && this.authService.isLoggedIn()) {
+        //   this.authService.logout();
+        //   this.router.navigate(['/login-register']).then(() => {
+        //     this.notificationService.showWarning("Session expired", "Your session has expired", "topRight");
+        //   })
+        // }
 
         return throwError(() => err);
       }))
