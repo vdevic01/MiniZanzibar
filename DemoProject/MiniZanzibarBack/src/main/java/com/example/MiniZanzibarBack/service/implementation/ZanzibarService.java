@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
-
 @Service
 public class ZanzibarService {
     private final RestTemplate restTemplate;
@@ -20,24 +19,26 @@ public class ZanzibarService {
         this.restTemplate = restTemplateBuilder.build();
     }
 
-    public boolean checkAccess(String userId, String fileId, String permission) {
+    public boolean checkAccess(String userId, String fileId, String relation) {
         String url = "http://localhost:8080/api/acl/check";
-        Map<String, Object> request = Map.of(
-                "userId", userId,
-                "objectId", fileId,
-                "permission", permission
+        Map<String, String> request = Map.of(
+                "namespace", "doc",
+                "object_id", fileId,
+                "relation", relation,
+                "user_id", userId
         );
 
         ResponseEntity<Boolean> response = restTemplate.postForEntity(url, request, Boolean.class);
         return response.getBody() != null && response.getBody();
     }
 
-    public void createAcl(String userId, String fileId, String permission) {
+    public void createAcl(String userId, String fileId, String relation) {
         String url = "http://localhost:8080/api/acl";
-        Map<String, Object> request = Map.of(
-                "userId", userId,
-                "objectId", fileId,
-                "permission", permission
+        Map<String, String> request = Map.of(
+                "namespace", "doc",
+                "object_id", fileId,
+                "relation", relation,
+                "user_id", userId
         );
 
         restTemplate.postForEntity(url, request, Void.class);
