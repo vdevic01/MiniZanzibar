@@ -87,6 +87,8 @@ public class FileController {
         }
     }
 
+
+
     @GetMapping("/owned-files")
     public ResponseEntity<List<DocumentDTO>> getOwnedFiles() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -225,6 +227,45 @@ public class FileController {
         zanzibarService.deleteAcl(userToUnshareWith.get().getId().toString(), fileId, relation);
 
         return new ResponseEntity<>("Permission deleted successfully.", HttpStatus.OK);
+    }
+
+    @PutMapping("/edit/{fileId:.+}")
+    public ResponseEntity<String> editFile(@PathVariable String fileId, @RequestParam(value = "file", required = false) MultipartFile file, @RequestParam(value = "name", required = false) String name) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentPrincipalName = authentication.getName();
+        Optional<User> user = userRepository.findByEmail(currentPrincipalName);
+        if (user.isEmpty()) {
+            return new ResponseEntity<>("User not found!", HttpStatus.FORBIDDEN);
+        }
+
+        // Check if the user has permission to edit the file
+        boolean hasAccess = zanzibarService.checkAccess(user.get().getId().toString(), fileId, "editor");
+        if (!hasAccess) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Document document = documentService.findById(Long.valueOf(fileId));
+        if (document == null) {
+            return new ResponseEntity<>("Document not found!", HttpStatus.NOT_FOUND);
+        }
+
+        try {
+            if (file != null && !file.isEmpty()) {
+                // Save the new file to the specified directory
+                String filePath = UPLOAD_DIR + File.separator + document.getId();
+                file.transferTo(new File(filePath));
+            }
+
+            if (name != null && !name.isEmpty()) {
+                // Update the document name
+                document.setName(name);
+                documentService.save(document);
+            }
+
+            return new ResponseEntity<>("Document updated successfully.", HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>("Failed to update file: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("/delete/{fileId:.+}")
