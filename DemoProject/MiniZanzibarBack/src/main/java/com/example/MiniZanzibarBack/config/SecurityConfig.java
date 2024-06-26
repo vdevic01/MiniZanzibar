@@ -45,6 +45,7 @@ public class SecurityConfig {
         return (web) -> {
             web.ignoring().requestMatchers(HttpMethod.POST, "/api/user/login");
             web.ignoring().requestMatchers(HttpMethod.POST, "/api/user/registration");
+            web.ignoring().requestMatchers(HttpMethod.POST, "/api/files/upload");
         };
     }
 
