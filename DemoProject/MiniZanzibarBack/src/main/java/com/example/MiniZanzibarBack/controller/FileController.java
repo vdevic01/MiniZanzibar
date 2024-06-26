@@ -118,5 +118,26 @@ public class FileController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getName() + "\"")
                 .body(resource);
     }
+
+    @PostMapping("/permissions/{fileId:.+}")
+    public ResponseEntity<String> addPermission(@PathVariable String fileId, @RequestParam("userId") String userId, @RequestParam("relation") String relation) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentPrincipalName = authentication.getName();
+        Optional<User> user = userRepository.findByEmail(currentPrincipalName);
+        if (user.isEmpty()) {
+            return new ResponseEntity<>("User not found!", HttpStatus.FORBIDDEN);
+        }
+
+        // Check if the current user is the owner of the file
+        Document document = documentService.findById(Long.valueOf(fileId));
+        if (document == null || zanzibarService.checkAccess(user.get().getEmail(), fileId, relation)) {
+            return new ResponseEntity<>("You do not have permission to grant access to this file!", HttpStatus.FORBIDDEN);
+        }
+
+        // Create ACL for the specified user to have access to the file
+        zanzibarService.createAcl(userId, fileId, relation);
+
+        return new ResponseEntity<>("Permission granted successfully.", HttpStatus.OK);
+    }
 }
 
