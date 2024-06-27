@@ -24,6 +24,6 @@ public class DocumentService extends BaseService<Document>{
         documentRepository.delete(document);
     }
     public DocumentDTO convertToDTO(Document document) {
-        return new DocumentDTO(document.getId(), document.getName(), document.getOwner().getEmail());
+        return new DocumentDTO(document.getId(), document.getName(), document.getOwner().getEmail(), document.getCreatedAt(), document.getUpdatedAt());
     }
 }

@@ -165,13 +165,14 @@ public class FileController {
 
         Document document = documentService.findById(Long.valueOf(fileId));
 
-        // Determine content type based on file extension
-        String contentType = "application/octet-stream"; // Default to binary data if contentType is not detectable
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + document.getName());
+        headers.add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.CONTENT_DISPOSITION);
 
         // Set Content-Disposition header to prompt file download
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getName() + "\"")
+                .contentType(MediaType.parseMediaType("application/octet-stream"))
+                .headers(headers)
                 .body(resource);
     }
 

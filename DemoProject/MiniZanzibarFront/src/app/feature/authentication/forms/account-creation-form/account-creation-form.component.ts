@@ -42,8 +42,6 @@ export class AccountCreationFormComponent implements OnInit {
         this.notificationService.showSuccess("Account created!", "Account created successfully!", 'topLeft');
       },
       error: (error) => {
-        window.alert("USO1")
-        console.log(error)
         if (error.status == 409) {
           this.notificationService.showWarning("Username taken", "Username is already taken!", "topLeft");
         }

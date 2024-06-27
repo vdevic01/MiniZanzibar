@@ -23,7 +23,8 @@ import {ReactiveFormsModule} from "@angular/forms";
   imports: [
     CommonModule,
     ReactiveFormsModule,
-  ]
+  ],
+  providers: [DateFormatPipe]
 })
 export class SharedModule {
 }

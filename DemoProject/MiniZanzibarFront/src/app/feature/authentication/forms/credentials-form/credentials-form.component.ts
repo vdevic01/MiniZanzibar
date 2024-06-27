@@ -3,6 +3,7 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {AuthService} from "../../../../core/services/auth.service";
 import {NotificationService} from "../../../../core/services/notification.service";
 import {Credentials} from "../../../../core/model/credentials";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-credentials-form',
@@ -20,7 +21,8 @@ export class CredentialsFormComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private notificationService: NotificationService) {
+    private notificationService: NotificationService,
+    private router: Router) {
   }
 
   ngOnInit(): void {
@@ -35,7 +37,7 @@ export class CredentialsFormComponent implements OnInit {
 
       this.authService.loginUser(credentials).subscribe({
         next: () => {
-          this.notificationService.showSuccess("Login success!", "Login success!", 'topRight');
+          this.router.navigate(['home']);
         },
         error: (error) => {
           if (error.status == 400) {
