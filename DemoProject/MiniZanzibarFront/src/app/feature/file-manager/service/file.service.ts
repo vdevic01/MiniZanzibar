@@ -20,6 +20,13 @@ export class FileService {
     );
   }
 
+  getAccessibleFiles(): Observable<Document[]> {
+    const api = `${this.apiUrl}/accessible-files`;
+    return this.http.get<Document[]>(api).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   downloadFile(fileId: string): Observable<HttpResponse<Blob>> {
     const url = `${this.apiUrl}/download/${fileId}`;
     return this.http.get(url, {

@@ -52,7 +52,7 @@ export class AuthService {
     const payloadEncoded = tokenParts[1];
     const payloadDecoded = atob(payloadEncoded);
     const payload = JSON.parse(payloadDecoded);
-    return payload.username;
+    return payload.sub;
   }
 
   setAuthToken(token: string) {

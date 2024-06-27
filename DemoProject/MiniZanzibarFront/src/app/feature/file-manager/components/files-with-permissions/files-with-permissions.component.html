@@ -1,0 +1,31 @@
+<main>
+  <div class="head-title">
+    <div class="left">
+      <h1>Files with permissions</h1>
+    </div>
+  </div>
+
+  <div class="table-data">
+    <div class="order">
+      <table>
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Creation Date</th>
+          <th>Last Change</th>
+          <th class="table-button"></th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <app-file-row
+          class="table-line"
+          *ngFor="let file of allFiles"
+          [file]="file"
+          [refresh]="refresh.bind(this)">
+        </app-file-row>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
