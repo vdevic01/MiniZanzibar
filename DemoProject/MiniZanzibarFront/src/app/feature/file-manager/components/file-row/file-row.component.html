@@ -15,11 +15,15 @@
         <mat-icon>download</mat-icon>
         <span>Download</span>
       </button>
-      <button mat-menu-item >
-        <mat-icon>share</mat-icon>
-        <span>Share</span>
+      <button mat-menu-item (click)="openAddPermissionDialog()">
+        <mat-icon>add</mat-icon>
+        <span>Add permission</span>
       </button>
-      <button mat-menu-item >
+      <button mat-menu-item (click)="openAddPermissionDialog()">
+        <mat-icon>remove</mat-icon>
+        <span>Remove permission</span>
+      </button>
+      <button mat-menu-item (click)="openEditFileDIalog()">
         <mat-icon>edit</mat-icon>
         <span>Edit</span>
       </button>

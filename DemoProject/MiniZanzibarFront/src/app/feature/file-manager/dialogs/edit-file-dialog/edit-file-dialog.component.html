@@ -1,0 +1,24 @@
+<div class="dialog">
+  <form [formGroup]="uploadFileForm">
+    <h2 class="title">Upload File</h2>
+
+    <div class="file-input-container">
+      <input type="file" class="upload-box" (change)="onFileSelected($event)"/>
+    </div>
+
+    <div class="btn-container">
+      <app-back-button
+        [buttonText]="'BACK'"
+        (onBack)="cancel()"
+      >
+
+      </app-back-button>
+
+      <app-form-button
+        [form]="uploadFileForm"
+        [buttonText]="'Upload'"
+        (onSubmit)="create()">
+      </app-form-button>
+    </div>
+  </form>
+</div>
