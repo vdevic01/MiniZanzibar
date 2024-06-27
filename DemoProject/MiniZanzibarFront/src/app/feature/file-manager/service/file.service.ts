@@ -14,7 +14,7 @@ export class FileService {
   }
 
   getOwnedFiles(): Observable<Document[]> {
-    const api = `${this.apiUrl}/accessible-files`;
+    const api = `${this.apiUrl}/owned-files`;
     return this.http.get<Document[]>(api).pipe(
       catchError(this.handleError)
     );
@@ -31,12 +31,29 @@ export class FileService {
   uploadFile(file: File): Observable<any> {
     const formData: FormData = new FormData();
     formData.append('file', file, file.name);
-    return this.http.post(`${this.apiUrl}/upload`, formData, { responseType: 'text'});
+    return this.http.post(`${this.apiUrl}/upload`, formData, {responseType: 'text'});
+  }
+
+  editFile(fileId: string, file: File): Observable<any> {
+    const formData: FormData = new FormData();
+    formData.append('file', file, file.name);
+    formData.append('name', file.name);
+    return this.http.put(`${this.apiUrl}/edit/${fileId}`, formData, {responseType: 'text'});
   }
 
   deleteFile(fileId: string): Observable<any> {
     const url = `${this.apiUrl}/delete/${fileId}`;
-    return this.http.delete(url, { responseType: 'text'})
+    return this.http.delete(url, {responseType: 'text'})
+  }
+
+  addPermission(fileId: string, email: string, permission: string): Observable<any> {
+    const url = `${this.apiUrl}/permissions/${fileId}?email=${email}&relation=${permission}`;
+    return this.http.post(url, null, {responseType: 'text'});
+  }
+
+  removePermission(fileId: string, email: string, permission: string): Observable<any> {
+    const url = `${this.apiUrl}/permissions/${fileId}?email=${email}&relation=${permission}`;
+    return this.http.delete(url, {responseType: 'text'});
   }
 
   private handleError(error: HttpErrorResponse) {

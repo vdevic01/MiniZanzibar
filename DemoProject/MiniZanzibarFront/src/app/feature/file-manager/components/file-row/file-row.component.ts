@@ -5,6 +5,8 @@ import {FileService} from "../../service/file.service";
 import {MatDialog} from "@angular/material/dialog";
 import {UploadFileDialogComponent} from "../../dialogs/upload-file-dialog/upload-file-dialog.component";
 import {NotificationService} from "../../../../core/services/notification.service";
+import {AddPermissionDialogComponent} from "../../dialogs/add-permission-dialog/add-permission-dialog.component";
+import {EditFileDialogComponent} from "../../dialogs/edit-file-dialog/edit-file-dialog.component";
 
 @Component({
   selector: 'app-file-row',
@@ -119,5 +121,28 @@ export class FileRowComponent implements OnInit {
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
+  }
+
+  openAddPermissionDialog() {
+    const dialogRef = this.dialog.open(AddPermissionDialogComponent, {
+      data: {
+        fileId: this.file?.id!
+      }
+    });
+  }
+
+  openEditFileDIalog() {
+    const dialogRef = this.dialog.open(EditFileDialogComponent, {
+      data: {
+        fileId: this.file?.id!
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.refresh();
+        this.notificationService.showSuccess("File edited!", "File edited successfully!", "topRight");
+      }
+    });
   }
 }
