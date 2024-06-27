@@ -24,9 +24,6 @@ export class AddPermissionDialogComponent implements OnInit{
 
   onEnter(event: any) {
     const email = event.target.value;
-
-    console.log(this.fileId, email, this.selected);
-
     if (email != '' && this.selected) {
       this.addPermission(this.fileId, email, this.selected);
     }

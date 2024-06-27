@@ -11,6 +11,7 @@ import {MatInputModule} from "@angular/material/input";
 import {MatSelectModule} from "@angular/material/select";
 import { EditFileDialogComponent } from './dialogs/edit-file-dialog/edit-file-dialog.component';
 import { RemovePermissionDialogComponent } from './dialogs/remove-permission-dialog/remove-permission-dialog.component';
+import { FilesWithPermissionsComponent } from './components/files-with-permissions/files-with-permissions.component';
 
 
 @NgModule({
@@ -20,7 +21,8 @@ import { RemovePermissionDialogComponent } from './dialogs/remove-permission-dia
     UploadFileDialogComponent,
     AddPermissionDialogComponent,
     EditFileDialogComponent,
-    RemovePermissionDialogComponent
+    RemovePermissionDialogComponent,
+    FilesWithPermissionsComponent
   ],
   imports: [
     CommonModule,
